@@ -1,4 +1,4 @@
-module duongndh/api
+module snapser/cloudecode
 
 go 1.13
 
