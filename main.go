@@ -9,12 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// @title           Swagger Example API
-// @version         1.0
-// @description     snapser cloud code
-
-// @license.name  Apache 2.0
-// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+// @title           Skybull Snapser CloudeCode
+// @version         0.0.1
+// @description     Skybull snapser cloud code
 
 // @host      localhost:8080
 // @BasePath  /

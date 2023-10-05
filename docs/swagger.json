@@ -1,14 +1,10 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "snapser cloud code",
-        "title": "Swagger Example API",
+        "description": "Skybull snapser cloud code",
+        "title": "Skybull Snapser CloudeCode",
         "contact": {},
-        "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-        },
-        "version": "1.0"
+        "version": "0.0.1"
     },
     "host": "localhost:8080",
     "basePath": "/",
