@@ -1,0 +1,104 @@
+info:
+  contact: {}
+paths:
+  //update-currency:
+    post:
+      consumes:
+      - multipart/form-data
+      description: get accounts
+      parameters:
+      - description: userId when they login
+        in: formData
+        name: userId
+        required: true
+        type: string
+      - description: session token
+        in: formData
+        name: sessionToken
+        required: true
+        type: string
+      - description: 'type of currency: SORT_CURRENCY or PREMIUM_CURRENCY'
+        in: formData
+        name: type
+        required: true
+        type: string
+      - description: value need to update
+        in: formData
+        name: value
+        required: true
+        type: string
+      - description: source of gold
+        in: formData
+        name: goldSource
+        required: true
+        type: string
+      produces:
+      - multipart/form-data
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: List accounts
+      tags:
+      - accounts
+  /energy:
+    post:
+      consumes:
+      - multipart/form-data
+      description: get accounts
+      parameters:
+      - description: userId when they login
+        in: formData
+        name: userId
+        required: true
+        type: string
+      - description: session token
+        in: formData
+        name: sessionToken
+        required: true
+        type: string
+      - description: energy value need to update
+        in: formData
+        name: energy
+        required: true
+        type: string
+      produces:
+      - multipart/form-data
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: List accounts
+      tags:
+      - accounts
+swagger: "2.0"
