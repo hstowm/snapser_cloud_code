@@ -19,6 +19,8 @@ const energy_key = "energy"
 const energy_update_key = "energy_update_time"
 const time_fomat = "2006-01-02T15:04:05Z07:00"
 
+// @title  update energy
+// @version 1.0
 // @Summary      List accounts
 // @Description  get accounts
 // @Tags         accounts
@@ -88,6 +90,8 @@ validateDone:
 	}
 }
 
+// @title  update currency
+// @version 1.0
 // @Summary      List accounts
 // @Description  get accounts
 // @Tags         accounts
