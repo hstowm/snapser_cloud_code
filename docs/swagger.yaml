@@ -9,11 +9,11 @@ info:
   title: Skybull Snapser CloudeCode
   version: 0.0.1
 paths:
-  //update-currency:
+  /v2/byosnap-skybull/level-up-champion:
     post:
       consumes:
       - multipart/form-data
-      description: get accounts
+      description: Level up champion
       parameters:
       - description: userId when they login
         in: formData
@@ -25,19 +25,9 @@ paths:
         name: sessionToken
         required: true
         type: string
-      - description: 'type of currency: SORT_CURRENCY or PREMIUM_CURRENCY'
+      - description: champion userID
         in: formData
-        name: type
-        required: true
-        type: string
-      - description: value need to update
-        in: formData
-        name: value
-        required: true
-        type: string
-      - description: source of gold
-        in: formData
-        name: goldSource
+        name: championUserId
         required: true
         type: string
       produces:
@@ -61,14 +51,12 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: List accounts
-      tags:
-      - accounts
-  /energy:
+      summary: Level up champion
+  /v2/byosnap-skybull/level-up-equipment:
     post:
       consumes:
       - multipart/form-data
-      description: get accounts
+      description: Level up equipment
       parameters:
       - description: userId when they login
         in: formData
@@ -80,9 +68,9 @@ paths:
         name: sessionToken
         required: true
         type: string
-      - description: energy value need to update
+      - description: id of equipment player want to level up
         in: formData
-        name: energy
+        name: UserEquipmentUID
         required: true
         type: string
       produces:
@@ -106,9 +94,184 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: List accounts
-      tags:
-      - accounts
+      summary: Level up equipment
+  /v2/byosnap-skybull/re-roll-equipment-modifier:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Re-roll player equipment modifier
+      parameters:
+      - description: userId when they login
+        in: formData
+        name: userId
+        required: true
+        type: string
+      - description: session token
+        in: formData
+        name: sessionToken
+        required: true
+        type: string
+      - description: id of equipment player want to re-roll
+        in: formData
+        name: UserEquipmentUID
+        required: true
+        type: string
+      produces:
+      - multipart/form-data
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Re-Roll equipment modifier
+  /v2/byosnap-skybull/sell-equipment:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Sell player equipment
+      parameters:
+      - description: userId when they login
+        in: formData
+        name: userId
+        required: true
+        type: string
+      - description: session token
+        in: formData
+        name: sessionToken
+        required: true
+        type: string
+      - description: id of equipment player want to sell
+        in: formData
+        name: UserEquipmentUID
+        required: true
+        type: string
+      produces:
+      - multipart/form-data
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Sell equipment
+  /v2/byosnap-skybull/win-campaign:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Call when win a campaign
+      parameters:
+      - description: userId when they login
+        in: formData
+        name: userId
+        required: true
+        type: string
+      - description: session token
+        in: formData
+        name: sessionToken
+        required: true
+        type: string
+      - description: power stage player win
+        in: formData
+        name: stagePower
+        required: true
+        type: string
+      - description: the start they reach
+        in: formData
+        name: star
+        required: true
+        type: string
+      produces:
+      - multipart/form-data
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Call when win a campaign
+  /v2/byosnap-skybull/win-pvp:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Call when player win a pvp game
+      parameters:
+      - description: userId when they login
+        in: formData
+        name: userId
+        required: true
+        type: string
+      - description: session token
+        in: formData
+        name: sessionToken
+        required: true
+        type: string
+      - description: 'opponent snapser id '
+        in: formData
+        name: opponentID
+        required: true
+        type: string
+      produces:
+      - multipart/form-data
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Call when player win a pvp game
 securityDefinitions:
   BasicAuth:
     type: basic

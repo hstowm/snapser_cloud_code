@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"snapser"
+	"snapser/cloudecode/configs"
 	"strconv"
 	"time"
 )
@@ -15,35 +16,20 @@ type energyData struct {
 	time   string
 }
 
-const energy_key = "energy"
-const energy_update_key = "energy_update_time"
-const time_fomat = "2006-01-02T15:04:05Z07:00"
-
-// @title  update energy
-// @version 1.0
-// @Summary      List accounts
-// @Description  get accounts
-// @Tags         accounts
-// @Accept       mpfd
-// @Produce      mpfd
-// @Param	userId	formData	string	true	"userId when they login"
-// @Param	sessionToken	formData	string	true	"session token"
-// @Param	energy	formData	string	true	"energy value need to update"
-// @Success      200  {array}  	string
-// @Failure      400  {object}  string
-// @Failure      404  {object}  string
-// @Failure      500  {object}  string
-// @Router       /energy [post]
 func ValidateEnergyData(ctx *gin.Context) {
-	userId := ctx.PostForm("userId")
-	sessionToken := ctx.PostForm("sessionToken")
+	userId := ctx.PostForm(configs.UserId)
+	sessionToken := ctx.PostForm(configs.SessionToken)
 	newEnergy, err := strconv.Atoi(ctx.PostForm("energy"))
 	if err != nil {
 		ctx.String(http.StatusBadRequest, "text/plain", "energy wrong format")
 		return
 	}
 	apiClient := snapser.NewAPIClient(snapser.NewConfiguration())
-	res, _response, _ := apiClient.ProfilesServiceApi.GetProfile(context.Background(), userId).Token(sessionToken).Execute()
+	res, _response, err := apiClient.ProfilesServiceApi.GetProfile(context.Background(), userId).Token(sessionToken).Execute()
+	if _response == nil {
+		ctx.String(http.StatusBadRequest, "cannot send request to get profile"+err.Error()+" with userID: ."+userId+" and token: "+sessionToken+".")
+		return
+	}
 	if _response.StatusCode != http.StatusNotFound && _response.StatusCode != http.StatusOK {
 		ctn, _ := io.ReadAll(_response.Body)
 		ctx.String(http.StatusBadRequest, string(ctn))
@@ -51,12 +37,12 @@ func ValidateEnergyData(ctx *gin.Context) {
 	}
 	if _response.StatusCode == http.StatusOK {
 
-		if res.Profile[energy_key] != nil {
+		if res.Profile != nil {
 			energy := energyData{
-				energy: int(res.Profile[energy_key].(float64)),
-				time:   res.Profile[energy_update_key].(string),
+				energy: int(res.Profile[configs.EnergyKey].(float64)),
+				time:   res.Profile[configs.EnergyUpdateKey].(string),
 			}
-			oldTime, _err := time.Parse(time_fomat, energy.time)
+			oldTime, _err := time.Parse(configs.TimeFormat, energy.time)
 			if _err != nil {
 				goto validateDone
 			}
@@ -76,9 +62,9 @@ validateDone:
 	if res != nil {
 		profile = res.Profile
 	}
-	profile[energy_key] = newEnergy
-	profile[energy_update_key] = time.Now().Format(time_fomat)
-	print("current time %s", time.Now().Format(time_fomat))
+	profile[configs.EnergyKey] = newEnergy
+	profile[configs.EnergyUpdateKey] = time.Now().Format(configs.TimeFormat)
+	print("current time %s", time.Now().Format(configs.TimeFormat))
 	// validate new energy
 	// Set new energy
 	_, status, _ := apiClient.ProfilesServiceApi.UpsertProfile(context.Background(), userId).Token(sessionToken).Body(snapser.UpsertProfileRequest{
@@ -90,26 +76,9 @@ validateDone:
 	}
 }
 
-// @title  update currency
-// @version 1.0
-// @Summary      List accounts
-// @Description  get accounts
-// @Tags         accounts
-// @Accept       mpfd
-// @Produce      mpfd
-// @Param	userId	formData	string	true	"userId when they login"
-// @Param	sessionToken	formData	string	true	"session token"
-// @Param	type	formData	string	true	"type of currency: SORT_CURRENCY or PREMIUM_CURRENCY"
-// @Param	value	formData	string	true	"value need to update"
-// @Param	goldSource	formData	string	true	"source of gold"
-// @Success      200  {array}  	string
-// @Failure      400  {object}  string
-// @Failure      404  {object}  string
-// @Failure      500  {object}  string
-// @Router       //update-currency [post]
 func ValidateCurrency(ctx *gin.Context) {
-	userId := ctx.PostForm("userId")
-	sessionToken := ctx.PostForm("sessionToken")
+	userId := ctx.PostForm(configs.UserId)
+	sessionToken := ctx.PostForm(configs.SessionToken)
 	currencyType := ctx.PostForm("type")
 	gold, err := strconv.Atoi(ctx.PostForm("value"))
 	if err != nil {

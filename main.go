@@ -5,6 +5,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"net/http"
 	"snapser/cloudecode/docs"
+	economy "snapser/cloudecode/economy"
 
 	"github.com/gin-gonic/gin"
 )
@@ -34,8 +35,15 @@ func main() {
 			"message": "pong",
 		})
 	})
-	r.POST("/energy", ValidateEnergyData)
-	r.POST("/update-currency", ValidateCurrency)
-
+	v1 := r.Group("/v2/byosnap-skybull")
+	{
+		v1.POST("/level-up-champion", economy.LevelUpChampionFee)
+		v1.POST("/level-up-equipment", economy.LevelUpEquipmentFee)
+		v1.POST("/sell-equipment", economy.SellEquipment)
+		v1.POST("/re-roll-equipment-modifier", economy.ReRollEquipmentModifier)
+		v1.POST("/sell-champion", economy.SellEquipment)
+		v1.POST("/win-pvp", economy.WinPvPGame)
+		v1.POST("/win-campaign", economy.WinCampaign)
+	}
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }

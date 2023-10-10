@@ -7,6 +7,7 @@ require (
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.2
+	golang.org/x/net v0.16.0 // indirect
 	snapser v0.0.0-00010101000000-000000000000
 )
 

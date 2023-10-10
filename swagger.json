@@ -1,0 +1,507 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Skybull Snapser CloudeCode",
+    "description": "Skybull snapser cloud code",
+    "contact": {},
+    "version": "0.0.1"
+  },
+  "externalDocs": {
+    "description": "OpenAPI",
+    "url": "https://swagger.io/resources/open-api/"
+  },
+  "servers": [
+    {
+      "url": "//localhost:8080/"
+    }
+  ],
+  "paths": {
+    "/v2/byosnap-skybull/level-up-champion": {
+      "post": {
+        "summary": "Level up champion",
+        "description": "Level up champion",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "championUserId",
+                  "sessionToken",
+                  "userId"
+                ],
+                "properties": {
+                  "userId": {
+                    "type": "string",
+                    "description": "userId when they login"
+                  },
+                  "sessionToken": {
+                    "type": "string",
+                    "description": "session token"
+                  },
+                  "championUserId": {
+                    "type": "string",
+                    "description": "champion userID"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/byosnap-skybull/level-up-equipment": {
+      "post": {
+        "summary": "Level up equipment",
+        "description": "Level up equipment",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "UserEquipmentUID",
+                  "sessionToken",
+                  "userId"
+                ],
+                "properties": {
+                  "userId": {
+                    "type": "string",
+                    "description": "userId when they login"
+                  },
+                  "sessionToken": {
+                    "type": "string",
+                    "description": "session token"
+                  },
+                  "UserEquipmentUID": {
+                    "type": "string",
+                    "description": "id of equipment player want to level up"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/byosnap-skybull/re-roll-equipment-modifier": {
+      "post": {
+        "summary": "Re-Roll equipment modifier",
+        "description": "Re-roll player equipment modifier",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "UserEquipmentUID",
+                  "sessionToken",
+                  "userId"
+                ],
+                "properties": {
+                  "userId": {
+                    "type": "string",
+                    "description": "userId when they login"
+                  },
+                  "sessionToken": {
+                    "type": "string",
+                    "description": "session token"
+                  },
+                  "UserEquipmentUID": {
+                    "type": "string",
+                    "description": "id of equipment player want to re-roll"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/byosnap-skybull/sell-equipment": {
+      "post": {
+        "summary": "Sell equipment",
+        "description": "Sell player equipment",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "UserEquipmentUID",
+                  "sessionToken",
+                  "userId"
+                ],
+                "properties": {
+                  "userId": {
+                    "type": "string",
+                    "description": "userId when they login"
+                  },
+                  "sessionToken": {
+                    "type": "string",
+                    "description": "session token"
+                  },
+                  "UserEquipmentUID": {
+                    "type": "string",
+                    "description": "id of equipment player want to sell"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/byosnap-skybull/win-campaign": {
+      "post": {
+        "summary": "Call when win a campaign",
+        "description": "Call when win a campaign",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "sessionToken",
+                  "stagePower",
+                  "star",
+                  "userId"
+                ],
+                "properties": {
+                  "userId": {
+                    "type": "string",
+                    "description": "userId when they login"
+                  },
+                  "sessionToken": {
+                    "type": "string",
+                    "description": "session token"
+                  },
+                  "stagePower": {
+                    "type": "string",
+                    "description": "power stage player win"
+                  },
+                  "star": {
+                    "type": "string",
+                    "description": "the start they reach"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v2/byosnap-skybull/win-pvp": {
+      "post": {
+        "summary": "Call when player win a pvp game",
+        "description": "Call when player win a pvp game",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "opponentID",
+                  "sessionToken",
+                  "userId"
+                ],
+                "properties": {
+                  "userId": {
+                    "type": "string",
+                    "description": "userId when they login"
+                  },
+                  "sessionToken": {
+                    "type": "string",
+                    "description": "session token"
+                  },
+                  "opponentID": {
+                    "type": "string",
+                    "description": "opponent snapser id "
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BasicAuth": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    }
+  }
+}
