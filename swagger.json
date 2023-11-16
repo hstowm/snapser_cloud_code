@@ -16,16 +16,266 @@
     }
   ],
   "paths": {
-    "/v2/byosnap-skybull/level-up-champion": {
+    "/v1/byosnap-skybull-cloudcode/buy-energy": {
+      "get": {
+        "summary": "Get energy",
+        "description": "Get energy",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "Authorization Token",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "userId when they login",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
-        "summary": "Level up champion",
-        "description": "Level up champion",
+        "summary": "Buy energy by gold",
+        "description": "Buy energy by gold",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "Authorization Token",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
               "schema": {
                 "required": [
-                  "championUserId",
+                  "userId"
+                ],
+                "properties": {
+                  "userId": {
+                    "type": "string",
+                    "description": "userId when they login"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/byosnap-skybull-cloudcode/create-campaign-game": {
+      "post": {
+        "summary": "Call when start a campaign game",
+        "description": "Create campaign game and subject energy",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "Authorization Token",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "sessionToken",
+                  "userId"
+                ],
+                "properties": {
+                  "userId": {
+                    "type": "string",
+                    "description": "userId when they login"
+                  },
+                  "sessionToken": {
+                    "type": "string",
+                    "description": "session token"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/byosnap-skybull-cloudcode/create-pvp-game": {
+      "post": {
+        "summary": "Level up equipment",
+        "description": "Level up equipment",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "Authorization Token",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "matchId",
+                  "opponentID",
                   "sessionToken",
                   "userId"
                 ],
@@ -38,7 +288,102 @@
                     "type": "string",
                     "description": "session token"
                   },
-                  "championUserId": {
+                  "matchId": {
+                    "type": "string",
+                    "description": "id of the pvp game"
+                  },
+                  "opponentID": {
+                    "type": "string",
+                    "description": "id of opponent"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/byosnap-skybull-cloudcode/level-up-champion": {
+      "post": {
+        "summary": "Level up champion",
+        "description": "Level up champion",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "Authorization Token",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "sessionToken",
+                  "userChampionUid",
+                  "userId"
+                ],
+                "properties": {
+                  "userId": {
+                    "type": "string",
+                    "description": "userId when they login"
+                  },
+                  "sessionToken": {
+                    "type": "string",
+                    "description": "session token"
+                  },
+                  "userChampionUid": {
                     "type": "string",
                     "description": "champion userID"
                   }
@@ -95,17 +440,29 @@
         }
       }
     },
-    "/v2/byosnap-skybull/level-up-equipment": {
+    "/v1/byosnap-skybull-cloudcode/level-up-equipment": {
       "post": {
         "summary": "Level up equipment",
         "description": "Level up equipment",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "Authorization Token",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
               "schema": {
                 "required": [
-                  "UserEquipmentUID",
                   "sessionToken",
+                  "userEquipmentUID",
                   "userId"
                 ],
                 "properties": {
@@ -117,7 +474,7 @@
                     "type": "string",
                     "description": "session token"
                   },
-                  "UserEquipmentUID": {
+                  "userEquipmentUID": {
                     "type": "string",
                     "description": "id of equipment player want to level up"
                   }
@@ -174,10 +531,22 @@
         }
       }
     },
-    "/v2/byosnap-skybull/re-roll-equipment-modifier": {
+    "/v1/byosnap-skybull-cloudcode/re-roll-equipment-modifier": {
       "post": {
         "summary": "Re-Roll equipment modifier",
         "description": "Re-roll player equipment modifier",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "Authorization Token",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -253,10 +622,22 @@
         }
       }
     },
-    "/v2/byosnap-skybull/sell-equipment": {
+    "/v1/byosnap-skybull-cloudcode/sell-equipment": {
       "post": {
         "summary": "Sell equipment",
         "description": "Sell player equipment",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "Authorization Token",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -332,10 +713,22 @@
         }
       }
     },
-    "/v2/byosnap-skybull/win-campaign": {
+    "/v1/byosnap-skybull-cloudcode/win-campaign": {
       "post": {
         "summary": "Call when win a campaign",
         "description": "Call when win a campaign",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "Authorization Token",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -349,11 +742,11 @@
                 "properties": {
                   "userId": {
                     "type": "string",
-                    "description": "userId when they login"
+                    "description": "userId when they login with snapser"
                   },
                   "sessionToken": {
                     "type": "string",
-                    "description": "session token"
+                    "description": "session token for login version"
                   },
                   "stagePower": {
                     "type": "string",
@@ -416,10 +809,22 @@
         }
       }
     },
-    "/v2/byosnap-skybull/win-pvp": {
+    "/v1/byosnap-skybull-cloudcode/win-pvp": {
       "post": {
         "summary": "Call when player win a pvp game",
         "description": "Call when player win a pvp game",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "Authorization Token",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "multipart/form-data": {
