@@ -3,6 +3,7 @@ package inventory
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc/metadata"
@@ -23,25 +24,39 @@ type EquipmentData struct {
 	Rarity           int    `json:"equipmentRarity"`
 	NumReRoll        int    `json:"numReRoll"`
 	NumModifier      int    `json:"numModifier"`
-	NumEnhance       int    `json:"numEnhance"`
+	NumEnhance       int    `json:"timeEnhance"`
 }
 
 // CalculateEquipmentReRollFee Return fee is a negative number
 func CalculateEquipmentReRollFee(data EquipmentData) map[string]int32 {
 	fees := make(map[string]int32)
-	fees[configs.Gold] = -int32(100 + float64(data.Level)*50*math.Pow(configs.EquipmentModifierReRollScale, float64(data.NumReRoll)))
+	fees[configs.Gold] = -int32(float64(data.Level) * float64(data.Rarity+1) / 2 * math.Pow(configs.EquipmentModifierReRollScale, float64(data.NumReRoll)))
 	return fees
 }
 
 // CalculateEquipmentUpgradeFee Return fee is a negative number
 func CalculateEquipmentUpgradeFee(data EquipmentData, levelUp int) map[string]int32 {
 	fees := make(map[string]int32)
-	fees[configs.Gold] = -int32(100 + data.Level*50*levelUp*(data.Rarity+1))
+	fees[configs.Gold] = -int32(100 + data.Level*250*levelUp*(data.Rarity+1))
 	return fees
+}
+
+func CalculateUpgradeEquipmentFee(level int, rarity int) int32 {
+	if level > 0 {
+		fmt.Println("Fee to upgrade equipment is: " + strconv.Itoa(int(100+int32((rarity+1)*level*250))))
+		return 100 + int32((rarity+1)*level*250)
+	} else {
+		return 0
+	}
 }
 func CalculateEquipmentSellFee(data EquipmentData) map[string]int32 {
 	fees := make(map[string]int32)
-	fees[configs.Gold] = int32(50 + data.Level*50*(data.Rarity+1))
+	var sellCost int32
+	sellCost = int32(data.Level * 10 * (data.Rarity + 1))
+	for i := 1; i <= data.NumEnhance; i++ {
+		sellCost += int32(0.25 * (float64(CalculateUpgradeEquipmentFee(data.Level-i*2, data.Rarity))))
+	}
+	fees[configs.Gold] = sellCost
 	return fees
 }
 func (pgs *Router) GetPlayerAllEquipment(userID string, c context.Context) ([]EquipmentData, error) {

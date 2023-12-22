@@ -6,6 +6,7 @@ type ResMessage struct {
 	Code       int              `json:"code"`
 	Message    string           `json:"message"`
 	Currencies map[string]int32 `json:"currencies"`
+	Data       string           `json:"data"`
 }
 
 func (res *ResMessage) toString() string {

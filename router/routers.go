@@ -8,6 +8,7 @@ import (
 	"snapser/cloudecode/economy"
 	"snapser/cloudecode/internal_connector"
 	"snapser/cloudecode/inventory"
+	"snapser/cloudecode/profile"
 	inventorypb "snapser/cloudecode/snapserpb/inventory"
 	profilepb "snapser/cloudecode/snapserpb/profiles"
 	statspb "snapser/cloudecode/snapserpb/statistics"
@@ -26,6 +27,7 @@ type ROICloudServer struct {
 	MatchingRoute  *storage.Router
 	InventoryRoute *inventory.Router
 	EconomyRouter  *economy.Router
+	ProfileRouter  *profile.Router
 }
 type Routes []Route
 
@@ -42,13 +44,22 @@ func (pgs *ROICloudServer) NewRouter() *gin.Engine {
 		router.POST("/v1/byosnap-skybull-cloudcode/create-pvp-game", pgs.MatchingRoute.CreatePvpGame)
 		router.POST("/v1/byosnap-skybull-cloudcode/create-campaign-game", pgs.MatchingRoute.CreateCampaignGame)
 		router.GET("/v1/byosnap-skybull-cloudcode/get-energy", pgs.EconomyRouter.GetEnergy)
+		router.GET("/v1/byosnap-skybull-cloudcode/account-info", pgs.ProfileRouter.GetAccountInfo)
+		router.GET("/v1/byosnap-skybull-cloudcode/account-info-detail", pgs.ProfileRouter.GetAccountInfo2)
 		router.POST("/v1/byosnap-skybull-cloudcode/buy-energy", pgs.EconomyRouter.BuyEnergy)
 		router.POST("/v1/byosnap-skybull-cloudcode/recycle-equipment", pgs.InventoryRoute.RecycleEquipment)
 		router.POST("/v1/byosnap-skybull-cloudcode/recycle-champion", pgs.InventoryRoute.RecycleChampion)
+		router.POST("/v1/byosnap-skybull-cloudcode/recycle-card-skill", pgs.InventoryRoute.RecycleCardSkill)
+		router.GET("/v1/byosnap-skybull-cloudcode/daily-login-info", pgs.ProfileRouter.GetDailyRewardCheckingStatus)
+		router.GET("/v1/byosnap-skybull-cloudcode/newbie-login-info", pgs.ProfileRouter.GetNewbieRewardCheckingStatus)
+		router.POST("/v1/byosnap-skybull-cloudcode/claim-daily", pgs.ProfileRouter.CheckinDaily)
+		router.POST("/v1/byosnap-skybull-cloudcode/claim-newbie", pgs.ProfileRouter.CheckinNewbie)
 	}
 	return router
 }
+func DeleteAccount() {
 
+}
 func New() (*ROICloudServer, error) {
 	pgs := &ROICloudServer{}
 	connector, err := internal_connector.New()
@@ -96,7 +107,9 @@ func (pgs *ROICloudServer) CreateServiceRouter() {
 	pgs.MatchingRoute = new(storage.Router)
 	pgs.InventoryRoute = new(inventory.Router)
 	pgs.EconomyRouter = new(economy.Router)
+	pgs.ProfileRouter = new(profile.Router)
 	pgs.InventoryRoute.Route = pgs.connector
 	pgs.MatchingRoute.Route = pgs.connector
 	pgs.EconomyRouter.Route = pgs.connector
+	pgs.ProfileRouter.Route = pgs.connector
 }

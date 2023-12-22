@@ -42,7 +42,7 @@ func ValidateEnergyData(ctx *gin.Context) {
 				energy: int(res.Profile[configs.EnergyKey].(float64)),
 				time:   res.Profile[configs.EnergyUpdateKey].(string),
 			}
-			oldTime, _err := time.Parse(configs.TimeFormat, energy.time)
+			oldTime, _err := time.Parse(configs.TimeFormatTimeDay, energy.time)
 			if _err != nil {
 				goto validateDone
 			}
@@ -63,8 +63,8 @@ validateDone:
 		profile = res.Profile
 	}
 	profile[configs.EnergyKey] = newEnergy
-	profile[configs.EnergyUpdateKey] = time.Now().Format(configs.TimeFormat)
-	print("current time %s", time.Now().Format(configs.TimeFormat))
+	profile[configs.EnergyUpdateKey] = time.Now().Format(configs.TimeFormatTimeDay)
+	print("current time %s", time.Now().Format(configs.TimeFormatTimeDay))
 	// validate new energy
 	// Set new energy
 	_, status, _ := apiClient.ProfilesServiceApi.UpsertProfile(context.Background(), userId).Token(sessionToken).Body(snapser.UpsertProfileRequest{

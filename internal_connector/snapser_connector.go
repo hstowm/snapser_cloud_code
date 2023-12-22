@@ -3,6 +3,7 @@ package internal_connector
 import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	auth "snapser/cloudecode/snapserpb/auth"
 	inventorypb "snapser/cloudecode/snapserpb/inventory"
 	profilepb "snapser/cloudecode/snapserpb/profiles"
 	statspb "snapser/cloudecode/snapserpb/statistics"
@@ -14,6 +15,7 @@ type SnapserServiceConnector struct {
 	StatisticsClient statspb.StatisticsServiceClient
 	StorageClient    storagepb.StorageServiceClient
 	ProfileClient    profilepb.ProfilesServiceClient
+	Auth             auth.AuthServiceClient
 }
 
 func New() (*SnapserServiceConnector, error) {
@@ -38,6 +40,11 @@ func New() (*SnapserServiceConnector, error) {
 		return nil, err
 	}
 	pgs.StorageClient = storageClient
+	authenticateSvc, err := createAuthenticate()
+	if err != nil {
+		return nil, err
+	}
+	pgs.Auth = authenticateSvc
 	return pgs, nil
 }
 
@@ -74,5 +81,13 @@ func createProfiledClient() (profilepb.ProfilesServiceClient, error) {
 		return nil, err
 	}
 	client := profilepb.NewProfilesServiceClient(conn)
+	return client, nil
+}
+func createAuthenticate() (auth.AuthServiceClient, error) {
+	conn, err := grpc.Dial("service-auth:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
+	client := auth.NewAuthServiceClient(conn)
 	return client, nil
 }

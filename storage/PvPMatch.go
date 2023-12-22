@@ -2,6 +2,7 @@ package storage
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/metadata"
@@ -98,6 +99,7 @@ func (pgs *Router) CreatePvpGame(ctx *gin.Context) {
 		ctx.String(http.StatusBadRequest, "data is not enough")
 		return
 	}
+
 	c := metadata.AppendToOutgoingContext(ctx.Request.Context(), "gateway", "internal")
 	newGame := PVPGame{
 		MatchID:    matchID,
@@ -106,7 +108,7 @@ func (pgs *Router) CreatePvpGame(ctx *gin.Context) {
 		TimeCreate: time.Now(),
 		GameType:   PlayerGame,
 	}
-
+	fmt.Println("Create match between player: " + newGame.Client + " and " + newGame.Host)
 	hostProfile, err := pgs.Route.ProfileClient.GetProfile(c, &proto.GetProfileRequest{
 		UserId: userId,
 	})
@@ -159,6 +161,8 @@ func (pgs *Router) CreatePvpGame(ctx *gin.Context) {
 			})
 		}
 	}
+	fmt.Println("Create match between player: " + newGame.Client + " and " + newGame.Client)
+
 	if pgs.ListPvPGame == nil {
 		pgs.ListPvPGame = make(map[string]PVPGame)
 	}
@@ -335,7 +339,7 @@ func (pgs *Router) WinCampaign(ctx *gin.Context) {
 		Currencies: currencies,
 	})
 
-	newGame := CampaignGame{MatchId: uuid.New().String(), Star: star, TimeCreate: time.Now().Format(configs.TimeFormat), Reward: strconv.Itoa(int(currenciesGain[configs.Gold]))}
+	newGame := CampaignGame{MatchId: uuid.New().String(), Star: star, TimeCreate: time.Now().Format(configs.TimeFormatTimeDay), Reward: strconv.Itoa(int(currenciesGain[configs.Gold]))}
 	str, err := json.Marshal(newGame)
 	if err != nil {
 		return

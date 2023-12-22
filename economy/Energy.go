@@ -31,7 +31,8 @@ func GetEnergy(userID string, c context.Context, service *internal_connector.Sna
 	currentTime := time.Now()
 	energyAdded := 0
 	if err != nil {
-		lastUpdatedTime = currentTime.Format(configs.TimeFormat)
+		fmt.Println("update energy to max")
+		lastUpdatedTime = currentTime.Format(configs.TimeFormatTimeDay)
 		energyAdded = configs.MaxEnergy
 		_, err = service.StorageClient.InsertBlob(c, &proto2.InsertBlobRequest{
 			Key:        configs.EnergyUpdateKey,
@@ -44,12 +45,12 @@ func GetEnergy(userID string, c context.Context, service *internal_connector.Sna
 		}
 		return UpdateEnergy(userID, int32(energyAdded), c, service)
 	} else {
-
+		fmt.Println("update energy to by time")
 		_, err = service.StorageClient.ReplaceBlob(c, &proto2.ReplaceBlobRequest{
 			Key:        configs.EnergyUpdateKey,
 			AccessType: "private",
 			OwnerId:    userID,
-			Value:      currentTime.Format(configs.TimeFormat),
+			Value:      currentTime.Format(configs.TimeFormatTimeDay),
 			Create:     true,
 			Cas:        blob.Cas,
 			Ttl:        0,
@@ -60,13 +61,13 @@ func GetEnergy(userID string, c context.Context, service *internal_connector.Sna
 		lastUpdatedTime = blob.GetValue()
 		fmt.Println("last update time : " + lastUpdatedTime)
 	}
-	lastUpdateEnergyTime, err := time.Parse(configs.TimeFormat, lastUpdatedTime)
+	lastUpdateEnergyTime, err := time.Parse(configs.TimeFormatTimeDay, lastUpdatedTime)
 	if err != nil {
 		lastUpdateEnergyTime = currentTime
 		fmt.Println("error" + err.Error())
 	}
 	currentDay := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), 0, 0, 0, 0, currentTime.Location())
-	fmt.Print("day time: " + currentDay.Format(configs.TimeFormat))
+	fmt.Print("day time: " + currentDay.Format(configs.TimeFormatTimeDay))
 	timeDistance1 := int(math.Floor(lastUpdateEnergyTime.Sub(currentDay).Minutes() / 5))
 	timeDistance2 := int(math.Floor(currentTime.Sub(currentDay).Minutes() / 5))
 	fmt.Print("time update 1: " + strconv.Itoa(timeDistance1) + " time update 2 : " + strconv.Itoa(timeDistance2))
@@ -88,7 +89,11 @@ func UpdateEnergy(userID string, amountUpdate int32, c context.Context, service 
 		fmt.Println("Can not get currency data : " + err.Error())
 		currencies = make(map[string]int32)
 	}
-	energy := currencies[configs.Energy]
+	energy, isExist := currencies[configs.Energy]
+
+	if !isExist {
+		energy = 0
+	}
 	amountUpdate = int32(math.Min(float64(amountUpdate), float64(configs.MaxEnergy-(energy))))
 	if amountUpdate == 0 {
 		return currencies, nil
@@ -122,12 +127,14 @@ func (r *Router) GetEnergy(ctx *gin.Context) {
 		ctx.String(http.StatusBadRequest, "data is not enough")
 		return
 	}
+	fmt.Println("Get energy data")
 	c := metadata.AppendToOutgoingContext(ctx.Request.Context(), "gateway", "internal")
 	energy, err := GetEnergy(userId, c, r.Route)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, response.ResMessage{
-			Code:    http.StatusInternalServerError,
-			Message: err.Error(),
+		ctx.JSON(http.StatusOK, response.ResMessage{
+			Code:       http.StatusInternalServerError,
+			Message:    err.Error(),
+			Currencies: energy,
 		})
 		return
 	}
@@ -167,7 +174,7 @@ func (r *Router) BuyEnergy(ctx *gin.Context) {
 	}
 	// Sub Money
 	currenciesUpdate := make(map[string]int32)
-	currenciesUpdate[configs.Gold] = -500
+	currenciesUpdate[configs.Gold] = -1000
 	currencies, err := UpdateCurrencies(currenciesUpdate, userId, c, r.Route)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, response.ResMessage{

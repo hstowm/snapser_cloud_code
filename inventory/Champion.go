@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc/metadata"
+	"math"
 	"net/http"
 	"snapser/cloudecode/configs"
 	"snapser/cloudecode/economy"
@@ -28,7 +29,13 @@ type ChampionData struct {
 // CalculateChampionUpgradeFee Return fee is a negative number
 func CalculateChampionUpgradeFee(data ChampionData) map[string]int32 {
 	fees := make(map[string]int32)
-	fees[configs.Gold] = -int32(100 + data.Level*50)
+	levelUpChampionFee := 0
+	if data.Level >= 30 {
+		levelUpChampionFee = int(configs.AdvanceLevelUpChampionCost * math.Pow(configs.AdvanceLevelUpChampionScale, float64(data.Level-1)))
+	} else {
+		levelUpChampionFee = int(configs.BaseLevelUpChampionCost * math.Pow(configs.BaseLevelUpChampionScale, float64(data.Level-1)))
+	}
+	fees[configs.Gold] = -int32(levelUpChampionFee)
 	return fees
 }
 
