@@ -174,7 +174,7 @@ func (r *Router) BuyEnergy(ctx *gin.Context) {
 	}
 	// Sub Money
 	currenciesUpdate := make(map[string]int32)
-	currenciesUpdate[configs.Gold] = -1000
+	currenciesUpdate[configs.Diamond] = -25
 	currencies, err := UpdateCurrencies(currenciesUpdate, userId, c, r.Route)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, response.ResMessage{

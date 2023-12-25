@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc/metadata"
-	"math"
 	"net/http"
 	"snapser/cloudecode/configs"
 	"snapser/cloudecode/economy"
@@ -30,14 +29,21 @@ type EquipmentData struct {
 // CalculateEquipmentReRollFee Return fee is a negative number
 func CalculateEquipmentReRollFee(data EquipmentData) map[string]int32 {
 	fees := make(map[string]int32)
-	fees[configs.Gold] = -int32(float64(data.Level) * float64(data.Rarity+1) / 2 * math.Pow(configs.EquipmentModifierReRollScale, float64(data.NumReRoll)))
+	//fees[configs.Gold] = -int32(float64(data.Level) * float64(data.Rarity+1) / 2 * math.Pow(configs.EquipmentModifierReRollScale, float64(data.NumReRoll)))
+	fees[configs.Diamond] = -int32(data.Level * (data.Rarity + 1))
 	return fees
 }
 
 // CalculateEquipmentUpgradeFee Return fee is a negative number
 func CalculateEquipmentUpgradeFee(data EquipmentData, levelUp int) map[string]int32 {
 	fees := make(map[string]int32)
-	fees[configs.Gold] = -int32(100 + data.Level*250*levelUp*(data.Rarity+1))
+	if data.NumEnhance < 3 {
+		fees[configs.Gold] = -int32(100 + data.Level*250*levelUp*(data.Rarity+1))
+	} else if data.NumEnhance == 3 {
+		fees[configs.Diamond] = -int32(data.Level)
+	} else if data.NumEnhance == 4 {
+		fees[configs.Diamond] = -int32(data.Level * (data.Rarity + 1))
+	}
 	return fees
 }
 
