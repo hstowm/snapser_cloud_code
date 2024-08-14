@@ -2,9 +2,6 @@ package economy
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"golang.org/x/net/context"
-	"google.golang.org/grpc/metadata"
 	"math"
 	"net/http"
 	"snapser/cloudecode/configs"
@@ -14,6 +11,10 @@ import (
 	proto2 "snapser/cloudecode/snapserpb/storage"
 	"strconv"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc/metadata"
 )
 
 type Router struct {
@@ -43,7 +44,7 @@ func GetEnergy(userID string, c context.Context, service *internal_connector.Sna
 		if err != nil {
 			fmt.Println("Cannot update energy update time")
 		}
-		return UpdateEnergy(userID, int32(energyAdded), c, service)
+		return UpdateEnergy(userID, int32(energyAdded), false, c, service)
 	} else {
 		fmt.Println("update energy to by time")
 		_, err = service.StorageClient.ReplaceBlob(c, &proto2.ReplaceBlobRequest{
@@ -61,6 +62,13 @@ func GetEnergy(userID string, c context.Context, service *internal_connector.Sna
 		lastUpdatedTime = blob.GetValue()
 		fmt.Println("last update time : " + lastUpdatedTime)
 	}
+	energy, err := GetUserCurrencies(userID, c, service)
+	if err != nil {
+		return nil, err
+	}
+	if energy[configs.Energy] >= configs.MaxEnergy {
+		return energy, nil
+	}
 	lastUpdateEnergyTime, err := time.Parse(configs.TimeFormatTimeDay, lastUpdatedTime)
 	if err != nil {
 		lastUpdateEnergyTime = currentTime
@@ -75,26 +83,29 @@ func GetEnergy(userID string, c context.Context, service *internal_connector.Sna
 	if energyAdded != 0 {
 		// get currencies update time
 		fmt.Println("Update currencies amount: " + strconv.Itoa(energyAdded))
-		return UpdateEnergy(userID, int32(energyAdded), c, service)
+		return UpdateEnergy(userID, int32(energyAdded), false, c, service)
 	} else {
 		fmt.Println("energy not changed")
 		return GetUserCurrencies(userID, c, service)
 	}
 }
-func UpdateEnergy(userID string, amountUpdate int32, c context.Context, service *internal_connector.SnapserServiceConnector) (map[string]int32, error) {
+func UpdateEnergy(userID string, amountUpdate int32, isOver bool, c context.Context, service *internal_connector.SnapserServiceConnector) (map[string]int32, error) {
 	currenciesUpdate := make(map[string]int32)
 	currenciesUpdate[configs.Energy] = amountUpdate
 	currencies, err := GetUserCurrencies(userID, c, service)
-	if err != nil {
+	if err != nil || currencies == nil {
 		fmt.Println("Can not get currency data : " + err.Error())
 		currencies = make(map[string]int32)
 	}
-	energy, isExist := currencies[configs.Energy]
-
-	if !isExist {
-		energy = 0
+	if !isOver {
+		energy, isExist := currencies[configs.Energy]
+		if !isExist {
+			energy = 0
+		}
+		if !isOver {
+			amountUpdate = int32(math.Min(float64(amountUpdate), float64(configs.MaxEnergy-(energy))))
+		}
 	}
-	amountUpdate = int32(math.Min(float64(amountUpdate), float64(configs.MaxEnergy-(energy))))
 	if amountUpdate == 0 {
 		return currencies, nil
 	}
@@ -184,7 +195,7 @@ func (r *Router) BuyEnergy(ctx *gin.Context) {
 		})
 		return
 	}
-	energy, err := UpdateEnergy(userId, configs.MaxEnergy, c, r.Route)
+	energy, err := UpdateEnergy(userId, configs.MaxEnergy, false, c, r.Route)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.ResMessage{
 			Code:       http.StatusInternalServerError,

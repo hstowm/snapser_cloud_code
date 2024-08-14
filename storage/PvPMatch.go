@@ -142,7 +142,7 @@ func (pgs *Router) CreatePvpGame(ctx *gin.Context) {
 		}
 	}
 	// Sub energy in two player
-	_, err = economy.UpdateEnergy(newGame.Host, -configs.EnergyUseWhenPlay, c, pgs.Route)
+	_, err = economy.UpdateEnergy(newGame.Host, -configs.EnergyUseWhenPlay, false, c, pgs.Route)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, response.ResMessage{
 			Code:       http.StatusInternalServerError,
@@ -152,7 +152,7 @@ func (pgs *Router) CreatePvpGame(ctx *gin.Context) {
 		return
 	}
 	if newGame.GameType == PlayerGame {
-		_, err = economy.UpdateEnergy(newGame.Client, -configs.EnergyUseWhenPlay, c, pgs.Route)
+		_, err = economy.UpdateEnergy(newGame.Client, -configs.EnergyUseWhenPlay, false, c, pgs.Route)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, response.ResMessage{
 				Code:       http.StatusInternalServerError,
@@ -195,7 +195,7 @@ func (pgs *Router) CreateCampaignGame(ctx *gin.Context) {
 	}
 	c := metadata.AppendToOutgoingContext(ctx.Request.Context(), "gateway", "internal")
 	// Sub energy in two player
-	currencies, err := economy.UpdateEnergy(userId, -configs.EnergyUseWhenPlay, c, pgs.Route)
+	currencies, err := economy.UpdateEnergy(userId, -configs.EnergyUseWhenPlay, false, c, pgs.Route)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, response.ResMessage{
 			Code:       http.StatusInternalServerError,

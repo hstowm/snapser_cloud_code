@@ -3,11 +3,6 @@ package profile
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	structpb "github.com/golang/protobuf/ptypes/struct"
-	"golang.org/x/net/context"
-	"google.golang.org/grpc/metadata"
-	structpb2 "google.golang.org/protobuf/types/known/structpb"
 	"net/http"
 	"snapser/cloudecode/configs"
 	"snapser/cloudecode/internal_connector"
@@ -17,6 +12,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	structpb "github.com/golang/protobuf/ptypes/struct"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc/metadata"
+	structpb2 "google.golang.org/protobuf/types/known/structpb"
 )
 
 type Router struct {
@@ -31,6 +32,10 @@ type CheckStatus struct {
 	Day   int `json:"day"`
 	State int `json:"state"`
 }
+type NewbieCheckStatus struct {
+	Day   string `json:"day"`
+	State int    `json:"state"`
+}
 
 const (
 	Claimed   int = 0
@@ -39,16 +44,16 @@ const (
 	NotComing     = 3
 )
 
-func GetStorageData(userId string, c context.Context, pgs *internal_connector.SnapserServiceConnector, blobName string, isAppendBlob bool) (string, error) {
+func GetStorageData(userId string, c context.Context, pgs *internal_connector.SnapserServiceConnector, blobName string, isAppendBlob bool, accessType string) (string, error) {
 	if isAppendBlob {
-		blob, err := pgs.StorageClient.GetAppendBlob(c, &proto.GetAppendBlobRequest{OwnerId: userId, AccessType: "private", Key: blobName})
+		blob, err := pgs.StorageClient.GetBlob(c, &proto.GetBlobRequest{OwnerId: userId, AccessType: accessType, Key: blobName})
 		if err != nil {
 			return "", err
 		}
 		return blob.GetValue(), nil
 
 	} else {
-		blob, err := pgs.StorageClient.GetBlob(c, &proto.GetBlobRequest{OwnerId: userId, AccessType: "private", Key: blobName})
+		blob, err := pgs.StorageClient.GetBlob(c, &proto.GetBlobRequest{OwnerId: userId, AccessType: accessType, Key: blobName})
 		if err != nil {
 			return "", err
 		}
@@ -56,7 +61,7 @@ func GetStorageData(userId string, c context.Context, pgs *internal_connector.Sn
 
 	}
 }
-func GetDailyLoginData(userId string, c context.Context, pgs *internal_connector.SnapserServiceConnector) ([]CheckStatus, error) {
+func GetDailyLoginData(userId string, c context.Context, pgs *internal_connector.SnapserServiceConnector) ([]NewbieCheckStatus, error) {
 	blob, err := pgs.StorageClient.GetAppendBlob(c, &proto.GetAppendBlobRequest{OwnerId: userId, AccessType: "private", Key: configs.LoginDataBlobName})
 	if err != nil {
 		fmt.Println("error: " + err.Error())
@@ -76,23 +81,18 @@ func GetDailyLoginData(userId string, c context.Context, pgs *internal_connector
 		}
 	}
 	// check from 1st day of this month to today
-	var checkInProgress []CheckStatus
-	for i := 1; i <= today.Day(); i++ {
-		if len(checkDay) > 0 {
-			// if login this day, add status
-			if i == checkDay[0].Day() {
-				checkInProgress = append(checkInProgress, CheckStatus{Day: i, State: Claimed})
-				checkDay = checkDay[1:]
-			} else {
-				checkInProgress = append(checkInProgress, CheckStatus{Day: i, State: UnClaimed})
-			}
-		} else {
-			checkInProgress = append(checkInProgress, CheckStatus{Day: i, State: UnClaimed})
-		}
+	var checkInProgress []NewbieCheckStatus
+	for i := today.Day() - 1; i >= 0; i-- {
+		var checkin_day = today.AddDate(0, 0, -i)
+		checkInProgress = append(checkInProgress, NewbieCheckStatus{Day: checkin_day.Format(configs.TimeFormatDayOnly), State: UnClaimed})
+	}
+	fmt.Println("Login at day: " + strconv.Itoa(len(checkDay)))
+	for i := 0; i < len(checkDay); i++ {
+		checkInProgress[checkDay[i].Day()-1].State = Claimed
 	}
 	return checkInProgress, nil
 }
-func GetNewbieLoginData(userId string, c context.Context, pgs *internal_connector.SnapserServiceConnector) ([]CheckStatus, error) {
+func GetNewbieLoginData(userId string, c context.Context, pgs *internal_connector.SnapserServiceConnector) ([]NewbieCheckStatus, error) {
 	blob, err := pgs.StorageClient.GetAppendBlob(c, &proto.GetAppendBlobRequest{OwnerId: userId, AccessType: "private", Key: configs.NewBieDataBlobName})
 	if err != nil {
 		fmt.Println("error " + err.Error())
@@ -116,7 +116,7 @@ func GetNewbieLoginData(userId string, c context.Context, pgs *internal_connecto
 		loginDay = loginDay[:len(loginDay)-1]
 		for _, value := range loginDay {
 			parse, err := time.Parse(configs.TimeFormatDayOnly, value)
-			if err == nil && parse.Year() == today.Year() && parse.Month() == today.Month() {
+			if err == nil {
 				checkDay = append(checkDay, parse)
 			}
 		}
@@ -124,21 +124,20 @@ func GetNewbieLoginData(userId string, c context.Context, pgs *internal_connecto
 	var day = int(secondDay.Sub(firstDay).Hours()) / 24
 	fmt.Println("Time from create: " + strconv.Itoa(int(secondDay.Sub(firstDay).Hours())))
 	fmt.Println("Create player for " + strconv.Itoa(day) + "day")
-	var checkInProgress []CheckStatus
-	if day > 7 {
+	var checkInProgress []NewbieCheckStatus
+	if day > 9 {
 		return checkInProgress, nil
 	}
-	for i := day; i >= 0; i-- {
-		vDay := today.AddDate(0, 0, -i)
+	for i := 0; i <= day; i++ {
+		var check_Day = createDayTime.AddDate(0, 0, i)
+		checkInProgress = append(checkInProgress, NewbieCheckStatus{Day: check_Day.Format(configs.TimeFormatDayOnly), State: UnClaimed})
+	}
+	for _, vDay := range checkDay {
 		if len(checkDay) > 0 {
-			if vDay.Day() == checkDay[0].Day() && vDay.Month() == checkDay[0].Month() {
-				checkInProgress = append(checkInProgress, CheckStatus{Day: day - i + 1, State: Claimed})
-				checkDay = checkDay[1:]
-			} else {
-				checkInProgress = append(checkInProgress, CheckStatus{Day: day - i + 1, State: UnClaimed})
+			var index = int(vDay.Sub(firstDay).Hours() / 24)
+			if index < len(checkInProgress) {
+				checkInProgress[index].State = Claimed
 			}
-		} else {
-			checkInProgress = append(checkInProgress, CheckStatus{Day: day - i + 1, State: UnClaimed})
 		}
 	}
 	return checkInProgress, nil
@@ -242,6 +241,80 @@ func (pgs *Router) GetAccountInfo2(ctx *gin.Context) {
 		}
 		isNewUser = true
 	}
+
+	dataMap := make(map[string]string)
+	profileData, err := GetStorageData(userId, c, pgs.Route, configs.ProfileDataBlob, false, "protected")
+	if err == nil {
+		dataMap[configs.ProfileDataBlob] = profileData
+	}
+	championData, err := GetStorageData(userId, c, pgs.Route, configs.ChampionDataBlob, false, "private")
+	if err == nil {
+		dataMap[configs.ChampionDataBlob] = championData
+	}
+	equipmentData, err := GetStorageData(userId, c, pgs.Route, configs.EquipmentDataBlob, false, "private")
+	if err == nil {
+		dataMap[configs.EquipmentDataBlob] = equipmentData
+	}
+	cardSkillData, err := GetStorageData(userId, c, pgs.Route, configs.CardSkillDataBlob, false, "private")
+	if err == nil {
+		dataMap[configs.CardSkillDataBlob] = cardSkillData
+	}
+	rankData, err := GetStorageData(userId, c, pgs.Route, configs.RankDataBlob, false, "private")
+	if err == nil {
+		dataMap[configs.RankDataBlob] = rankData
+	}
+	teamData, err := GetStorageData(userId, c, pgs.Route, configs.UserTeamsBlob, false, "private")
+	if err == nil {
+		dataMap[configs.UserTeamsBlob] = teamData
+	}
+	campaignData, err := GetStorageData(userId, c, pgs.Route, configs.UserCampaignBlob, false, "private")
+	if err == nil {
+		dataMap[configs.UserCampaignBlob] = campaignData
+	}
+	questData, err := GetStorageData(userId, c, pgs.Route, configs.UserQuestBlob, false, "private")
+	if err == nil {
+		dataMap[configs.UserQuestBlob] = questData
+	}
+	pvpData, err := GetStorageData(userId, c, pgs.Route, configs.UserPvp, false, "private")
+	if err == nil {
+		dataMap[configs.UserPvp] = pvpData
+	}
+	lootBoxData, err := GetStorageData(userId, c, pgs.Route, configs.UserLootBox, false, "private")
+	if err == nil {
+		dataMap[configs.UserLootBox] = lootBoxData
+	}
+	itemPurchaseData, err := GetStorageData(userId, c, pgs.Route, configs.ItemPurchaseData, false, "protected")
+	if err == nil {
+		dataMap[configs.ItemPurchaseData] = itemPurchaseData
+	}
+	generalUtilsData, err := GetStorageData(userId, c, pgs.Route, configs.GeneralUtilsData, false, "private")
+	if err == nil {
+		dataMap[configs.GeneralUtilsData] = generalUtilsData
+	}
+	dealDailyShopData, err := GetStorageData(userId, c, pgs.Route, configs.DealDailyShopData, false, "private")
+	if err == nil {
+		dataMap[configs.DealDailyShopData] = dealDailyShopData
+	}
+	offerShop, err := GetStorageData(userId, c, pgs.Route, configs.OfferShopData, false, "private")
+	if err == nil {
+		dataMap[configs.OfferShopData] = offerShop
+	}
+	userQuestData, err := GetStorageData(userId, c, pgs.Route, configs.QuestData, false, "private")
+	if err == nil {
+		dataMap[configs.QuestData] = userQuestData
+	}
+	tutorialRecord, err := GetStorageData(userId, c, pgs.Route, configs.TutorialRecordBlob, false, "private")
+	if err == nil {
+		dataMap[configs.TutorialRecordBlob] = tutorialRecord
+	}
+	gameItems, err := GetStorageData(userId, c, pgs.Route, configs.GameItems, false, "private")
+	if err == nil {
+		dataMap[configs.GameItems] = gameItems
+	}
+	loginData, err := GetStorageData(userId, c, pgs.Route, configs.LoginData, false, "public")
+	if err == nil {
+		dataMap[configs.LoginData] = loginData
+	}
 	NewBieData, err := GetNewbieLoginData(userId, c, pgs.Route)
 	if err != nil {
 		ctx.JSON(http.StatusOK, response.ResMessage{Code: http.StatusInternalServerError, Message: "Create new user but error: " + err.Error()})
@@ -261,55 +334,6 @@ func (pgs *Router) GetAccountInfo2(ctx *gin.Context) {
 	if err != nil {
 		ctx.JSON(http.StatusOK, response.ResMessage{Code: http.StatusInternalServerError, Message: err.Error()})
 		return
-	}
-	dataMap := make(map[string]string)
-	profileData, err := GetStorageData(userId, c, pgs.Route, configs.ProfileDataBlob, false)
-	if err == nil {
-		dataMap[configs.ProfileDataBlob] = profileData
-	}
-	championData, err := GetStorageData(userId, c, pgs.Route, configs.ChampionDataBlob, false)
-	if err == nil {
-		dataMap[configs.ChampionDataBlob] = championData
-	}
-	equipmentData, err := GetStorageData(userId, c, pgs.Route, configs.EquipmentDataBlob, false)
-	if err == nil {
-		dataMap[configs.EquipmentDataBlob] = equipmentData
-	}
-	cardSkillData, err := GetStorageData(userId, c, pgs.Route, configs.CardSkillDataBlob, false)
-	if err == nil {
-		dataMap[configs.CardSkillDataBlob] = cardSkillData
-	}
-	rankData, err := GetStorageData(userId, c, pgs.Route, configs.RankDataBlob, false)
-	if err == nil {
-		dataMap[configs.RankDataBlob] = rankData
-	}
-	teamData, err := GetStorageData(userId, c, pgs.Route, configs.UserTeamsBlob, false)
-	if err == nil {
-		dataMap[configs.UserTeamsBlob] = teamData
-	}
-	campaignData, err := GetStorageData(userId, c, pgs.Route, configs.UserCampaignBlob, false)
-	if err == nil {
-		dataMap[configs.UserCampaignBlob] = campaignData
-	}
-	questData, err := GetStorageData(userId, c, pgs.Route, configs.UserQuestBlob, false)
-	if err == nil {
-		dataMap[configs.UserQuestBlob] = questData
-	}
-	pvpData, err := GetStorageData(userId, c, pgs.Route, configs.UserPvp, false)
-	if err == nil {
-		dataMap[configs.UserPvp] = pvpData
-	}
-	lootBoxData, err := GetStorageData(userId, c, pgs.Route, configs.UserLootBox, false)
-	if err == nil {
-		dataMap[configs.UserLootBox] = lootBoxData
-	}
-	itemPurchaseData, err := GetStorageData(userId, c, pgs.Route, configs.ItemPurchaseData, false)
-	if err == nil {
-		dataMap[configs.ItemPurchaseData] = itemPurchaseData
-	}
-	dealDailyShopData, err := GetStorageData(userId, c, pgs.Route, configs.DealDailyShopData, false)
-	if err == nil {
-		dataMap[configs.DealDailyShopData] = dealDailyShopData
 	}
 	dataMap[configs.LoginDataBlobName] = string(dailyDataString)
 	dataMap[configs.NewBieDataBlobName] = string(newbieDataString)
@@ -523,4 +547,10 @@ func (pgs *Router) CheckinNewbie(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, response.ResMessage{Code: http.StatusOK, Message: "Checkin success"})
 		return
 	}
+}
+func (pgs *Router) ReclaimNewbie(ctx *gin.Context) {
+
+}
+func (pgs *Router) ReclaimDailyReward(ctx *gin.Context) {
+
 }

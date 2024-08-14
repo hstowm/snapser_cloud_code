@@ -17,7 +17,12 @@ const (
 	UserMessage                  = "UserMessage"
 	UserLootBox                  = "UserLootBox"
 	ItemPurchaseData             = "ItemsPurchaseLimited"
+	GeneralUtilsData             = "GeneralUtils"
 	DealDailyShopData            = "DealDayShop"
+	OfferShopData                = "OfferShop"
+	QuestData                    = "QuestData"
+	LoginData                    = "LoginData"
+	TutorialRecord               = "TutorialRecord"
 	EnergyKey                    = "energy"
 	EnergyUpdateKey              = "energy_update_time"
 	TimeFormatTimeDay            = "2006-01-02T15:04:05Z07:00"
@@ -52,4 +57,5 @@ const (
 	CurrentSession               = "session1"
 	SessionBlobKey               = "Session"
 	EnergyUpdateTime             = 5
+	GameItems                    = "GameItems"
 )
