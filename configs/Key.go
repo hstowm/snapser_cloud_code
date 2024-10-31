@@ -58,4 +58,9 @@ const (
 	SessionBlobKey               = "Session"
 	EnergyUpdateTime             = 5
 	GameItems                    = "GameItems"
+	ReferrerId                   = "referrer_id"
+	ReferrerTier2                = "referrer_tier_2"
+	ReferrerEmail                = "referrer_email"
+	Invitee                      = "Invitee"
+	InviteeTier2                 = "Invitee_Tier_2"
 )

@@ -1,13 +1,14 @@
 package internal_connector
 
 import (
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	auth "snapser/cloudecode/snapserpb/auth"
 	inventorypb "snapser/cloudecode/snapserpb/inventory"
 	profilepb "snapser/cloudecode/snapserpb/profiles"
 	statspb "snapser/cloudecode/snapserpb/statistics"
 	storagepb "snapser/cloudecode/snapserpb/storage"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type SnapserServiceConnector struct {
@@ -51,7 +52,7 @@ func New() (*SnapserServiceConnector, error) {
 // We use GRPC internally to provide fast requests between services.  Users are authenticated at our API Gateway and then trusted once internal;
 // The API Gateway will add/override a header called "User-Id" that is the authenticated trusted user and can be relied on internally.
 func createInventoryClient() (inventorypb.InventoryServiceClient, error) {
-	conn, err := grpc.Dial("service-inventory:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("service-inventory:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +61,7 @@ func createInventoryClient() (inventorypb.InventoryServiceClient, error) {
 }
 
 func createStatisticsClient() (statspb.StatisticsServiceClient, error) {
-	conn, err := grpc.Dial("service-statistics:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("service-statistics:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +69,7 @@ func createStatisticsClient() (statspb.StatisticsServiceClient, error) {
 	return client, nil
 }
 func createStorageClient() (storagepb.StorageServiceClient, error) {
-	conn, err := grpc.Dial("service-storage:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("service-storage:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +77,7 @@ func createStorageClient() (storagepb.StorageServiceClient, error) {
 	return client, nil
 }
 func createProfiledClient() (profilepb.ProfilesServiceClient, error) {
-	conn, err := grpc.Dial("service-profiles:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("service-profiles:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +85,7 @@ func createProfiledClient() (profilepb.ProfilesServiceClient, error) {
 	return client, nil
 }
 func createAuthenticate() (auth.AuthServiceClient, error) {
-	conn, err := grpc.Dial("service-auth:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("service-auth:8080", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}

@@ -102,9 +102,7 @@ func UpdateEnergy(userID string, amountUpdate int32, isOver bool, c context.Cont
 		if !isExist {
 			energy = 0
 		}
-		if !isOver {
-			amountUpdate = int32(math.Min(float64(amountUpdate), float64(configs.MaxEnergy-(energy))))
-		}
+		amountUpdate = int32(math.Min(float64(amountUpdate), float64(configs.MaxEnergy-(energy))))
 	}
 	if amountUpdate == 0 {
 		return currencies, nil

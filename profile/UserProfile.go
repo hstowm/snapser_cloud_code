@@ -493,6 +493,7 @@ func (pgs *Router) CheckinDaily(ctx *gin.Context) {
 		return
 	}
 }
+
 func (pgs *Router) CheckinNewbie(ctx *gin.Context) {
 	userId := ctx.PostForm(configs.UserId)
 	sessionToken := ctx.PostForm(configs.SessionToken)
@@ -548,6 +549,73 @@ func (pgs *Router) CheckinNewbie(ctx *gin.Context) {
 		return
 	}
 }
+
+func (pgs *Router) UpdateReferral(ctx *gin.Context) {
+	userId := ctx.PostForm(configs.UserId)
+	sessionToken := ctx.PostForm(configs.SessionToken)
+	if userId == "" || sessionToken == "" {
+		ctx.String(http.StatusBadRequest, "data is not enough")
+		return
+	}
+	c := metadata.AppendToOutgoingContext(context.Background(), "gateway", "internal")
+	referrer_id := ctx.PostForm(configs.ReferrerId)
+	referrer_tier_2 := ctx.PostForm(configs.ReferrerTier2)
+
+	if referrer_id == "" {
+		ctx.String(http.StatusBadRequest, "No referrer id")
+		return
+	}
+
+	err_update_tier1 := UpdateReferralProfile(userId, referrer_id, configs.Invitee, c, pgs.Route)
+
+	if err_update_tier1 != nil {
+		ctx.String(http.StatusBadRequest, "Update profile failed with error"+err_update_tier1.Error())
+		return
+	}
+
+	if referrer_tier_2 != "" {
+		err_update_tier2 := UpdateReferralProfile(userId, referrer_tier_2, configs.InviteeTier2, c, pgs.Route)
+
+		if err_update_tier2 != nil {
+			ctx.String(http.StatusBadRequest, "Update profile tier2 failed with error"+err_update_tier2.Error())
+			return
+		}
+	}
+
+	ctx.JSON(http.StatusOK, response.ResMessage{Code: http.StatusOK, Message: "Update referrer success"})
+
+}
+func UpdateReferralProfile(userId string, referrer_id string, update_key string, c context.Context, pgs *internal_connector.SnapserServiceConnector) error {
+
+	hostProfile, err := pgs.ProfileClient.GetProfile(c, &proto2.GetProfileRequest{
+		UserId: referrer_id,
+	})
+	if err != nil {
+		return err
+	}
+
+	var invitee_value = hostProfile.Profile.Fields[update_key].String()
+
+	if invitee_value == "" {
+
+		//profile.Fields[configs.TimeCreateKey] = &structpb.Value{Kind: &structpb.Value_StringValue{StringValue: createTime}}
+		hostProfile.Profile.Fields[update_key] = &structpb2.Value{Kind: &structpb2.Value_StringValue{StringValue: userId}}
+	} else {
+
+		invitee_value += "," + userId
+		hostProfile.Profile.Fields[update_key] = &structpb2.Value{Kind: &structpb2.Value_StringValue{StringValue: invitee_value}}
+	}
+
+	_, err1 := pgs.ProfileClient.UpsertProfile(c, &proto2.UpsertProfileRequest{
+		UserId: referrer_id, Profile: hostProfile.Profile})
+
+	if err1 != nil {
+		return err1
+	}
+
+	return nil
+}
+
 func (pgs *Router) ReclaimNewbie(ctx *gin.Context) {
 
 }
